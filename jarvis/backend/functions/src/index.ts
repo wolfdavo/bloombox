@@ -1,4 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+// App setup
+import admin = require('firebase-admin');
+const serviceAccount = require('../bloombox-xyz-firebase-adminsdk-7te66-ec5b44ad86.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 import * as functions from 'firebase-functions';
 require('dotenv').config();
 
@@ -14,7 +22,7 @@ export const receiveJarvisMessage = functions.https.onRequest(
   async (request) => {
     console.log('request', request.body);
     const { Body, From } = request.body;
-    const response = await handleInbound(Body);
+    const response = await handleInbound(Body, From);
     await client.messages.create({
       body: response,
       from: process.env.TWILIO_PHONE_NUMBER,
@@ -26,7 +34,7 @@ export const receiveJarvisMessage = functions.https.onRequest(
 export const testEndpoint = functions.https.onRequest(
   async (request, response) => {
     const { Body } = request.body;
-    const res = await handleInbound(Body);
+    const res = await handleInbound(Body, process.env.MY_PHONE_NUMBER || '');
     response.send(res);
   }
 );
