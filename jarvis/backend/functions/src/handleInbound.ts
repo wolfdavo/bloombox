@@ -2,17 +2,11 @@
 require('dotenv').config();
 
 import { auth } from 'firebase-admin';
-// OpenAI setup
-import { Configuration, OpenAIApi } from 'openai';
 import { createNewUser } from './authentication/createNewUser';
 import { getJarvisUser } from './authentication/getJarvisUser';
 import messages from './constants/messages';
 import { generateResponse } from './util/generateResponse';
 import { sendText } from './util/sendText';
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
 
 export const handleInbound = async (message: string, phoneNumber: string) => {
   // Check if user is new
