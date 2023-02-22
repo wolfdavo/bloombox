@@ -5,6 +5,7 @@ const serviceAccount = require('../bloombox-xyz-firebase-adminsdk-7te66-ec5b44ad
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://bloombox-xyz.firebaseio.com',
 });
 
 import * as functions from 'firebase-functions';
@@ -17,6 +18,7 @@ const client = require('twilio')(accountSid, authToken);
 
 // Logic for handling inbound messages
 import { handleInbound } from './handleInbound';
+import { generateResponse } from './util/generateResponse';
 
 export const receiveJarvisMessage = functions.https.onRequest(
   async (request) => {
@@ -34,7 +36,9 @@ export const receiveJarvisMessage = functions.https.onRequest(
 export const testEndpoint = functions.https.onRequest(
   async (request, response) => {
     const { Body } = request.body;
-    const res = await handleInbound(Body, process.env.MY_PHONE_NUMBER || '');
+    const res = await generateResponse('+15555555555', Body);
     response.send(res);
   }
 );
+
+export * from './jobs';

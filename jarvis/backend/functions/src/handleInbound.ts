@@ -37,7 +37,7 @@ export const handleInbound = async (message: string, phoneNumber: string) => {
 
   // If user is active, generate response and send it
   if (user.billingState === 'active') {
-    const response = await generateResponse(message);
+    const response = await generateResponse(phoneNumber, message);
     await sendText(phoneNumber, response);
     return;
   }
@@ -46,7 +46,7 @@ export const handleInbound = async (message: string, phoneNumber: string) => {
   if (user.billingState === 'trial') {
     // If they have messages remaining, generate response and send it
     if (user.trialMessagesRemaining > 0) {
-      const response = await generateResponse(message);
+      const response = await generateResponse(phoneNumber, message);
       await sendText(phoneNumber, response);
     } else {
       // If they don't have messages remaining, send them a message saying they need to upgrade
