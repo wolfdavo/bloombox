@@ -1,10 +1,6 @@
 import Stripe from 'stripe';
 
-const {
-  STRIPE_API_KEY,
-  CLAUDIO_SUBSCRIPTION_PRICE_ID,
-  MANAGING_SUBSCRIPTIONS_WEBHOOK_SIGNING_SECRET,
-} = process.env;
+const { STRIPE_API_KEY } = process.env;
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const stripe = new Stripe(STRIPE_API_KEY!, {
