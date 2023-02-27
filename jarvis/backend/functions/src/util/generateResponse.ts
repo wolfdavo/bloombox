@@ -1,6 +1,6 @@
 // OpenAI setup
 import { Configuration, OpenAIApi } from 'openai';
-import messages from '../constants/messages';
+import { messages } from '../constants/messages';
 import { getConversation } from './getConversation';
 import { saveConversation } from './saveConversation';
 const configuration = new Configuration({

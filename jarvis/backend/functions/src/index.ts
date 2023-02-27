@@ -40,5 +40,3 @@ export const testEndpoint = functions.https.onRequest(
     response.send(res);
   }
 );
-
-export * from './jobs';

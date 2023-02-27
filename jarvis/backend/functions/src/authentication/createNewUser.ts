@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+import { createCustomer } from '../stripe/createCustomer';
 const db = admin.database();
 
 export const createNewUser = async (phoneNumber: string) => {
@@ -21,13 +22,23 @@ export const createNewUser = async (phoneNumber: string) => {
             console.log('Error creating new user:', error);
             return Promise.reject(new Error('error-creating-user'));
           });
-        // Create new user record
+        // Create user with stripe
+        const stripeCustomerId = await createCustomer({
+          phoneNumber,
+          uid: user.uid,
+        }).catch((error) => {
+          console.log('Error creating stripe customer:', error);
+          return Promise.reject(new Error('error-creating-stripe-customer'));
+        });
+
+        // Create user record in database
         const ref = db.ref(`users/${user.uid}`);
-        const userRecord: JarvisUser = {
+        const userRecord: ClaudioUser = {
           uid: user.uid,
           phoneNumber,
           billingState: 'trial',
           trialMessagesRemaining: 10,
+          stripeCustomerId,
         };
         await ref.set(userRecord);
         return Promise.resolve(user);

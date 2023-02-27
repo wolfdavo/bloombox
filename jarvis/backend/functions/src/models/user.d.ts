@@ -1,7 +1,8 @@
-interface JarvisUser {
+interface ClaudioUser {
   uid: string;
   phoneNumber: string;
-  billingState: 'trial' | 'active' | 'failed' | 'canceled';
+  billingState: 'trial' | 'active' | 'inactive';
   trialMessagesRemaining: number;
   name?: string;
+  stripeCustomerId?: string;
 }

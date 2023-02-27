@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import { getFirebaseUser } from './getFirebaseUser';
 
-export const getJarvisUser = async (phoneNumber: string) => {
+export const getClaudioUser = async (phoneNumber: string) => {
   const fbUser = await getFirebaseUser(phoneNumber).catch((error) => {
     return Promise.reject(error);
   });
@@ -12,7 +12,7 @@ export const getJarvisUser = async (phoneNumber: string) => {
       if (!snapshot.exists()) {
         return Promise.reject(new Error('user-not-found'));
       }
-      const data = snapshot.val() as JarvisUser;
+      const data = snapshot.val() as ClaudioUser;
       return data;
     })
     .catch((error) => {

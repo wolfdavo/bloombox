@@ -3,8 +3,12 @@ require('dotenv').config();
 
 import { auth } from 'firebase-admin';
 import { createNewUser } from './authentication/createNewUser';
-import { getJarvisUser } from './authentication/getJarvisUser';
-import messages from './constants/messages';
+import { getClaudioUser } from './authentication/getClaudioUser';
+import { messages } from './constants/messages';
+import {
+  createCustomerPortalSession,
+  createCustomerSubscriptionSession,
+} from './stripe/paymentWebhook';
 import { generateResponse } from './util/generateResponse';
 import { sendText } from './util/sendText';
 
@@ -30,7 +34,7 @@ export const handleInbound = async (message: string, phoneNumber: string) => {
   }
 
   // If not new, get Jarvis user
-  const user = await getJarvisUser(phoneNumber).catch((err) => {
+  const user = await getClaudioUser(phoneNumber).catch((err) => {
     console.log('Error getting user:', err);
     return Promise.reject(new Error('error-getting-user'));
   });
@@ -50,20 +54,24 @@ export const handleInbound = async (message: string, phoneNumber: string) => {
       await sendText(phoneNumber, response);
     } else {
       // If they don't have messages remaining, send them a message saying they need to upgrade
-      await sendText(phoneNumber, messages.trialExpired);
+      const checkoutSession = await createCustomerSubscriptionSession(user.uid);
+      if (checkoutSession === null) {
+        await sendText(phoneNumber, messages.error);
+        return;
+      }
+      await sendText(phoneNumber, messages.trialExpired + checkoutSession.url);
     }
     return;
   }
 
   // If user has failed billing, let them know and send Stripe link to fix it
-  if (user.billingState === 'failed') {
-    await sendText(phoneNumber, messages.billingFailed);
-    return;
-  }
-
-  // If user has canceled billing, let them know and send Stripe link to fix it
-  if (user.billingState === 'canceled') {
-    await sendText(phoneNumber, messages.billingCanceled);
+  if (user.billingState === 'inactive') {
+    const billingPortal = await createCustomerPortalSession(user.uid);
+    if (billingPortal === null) {
+      await sendText(phoneNumber, messages.error);
+      return;
+    }
+    await sendText(phoneNumber, messages.billingInactive + billingPortal.url);
     return;
   }
 };
