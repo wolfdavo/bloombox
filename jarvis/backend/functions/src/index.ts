@@ -5,16 +5,11 @@ const serviceAccount = require('../bloombox-xyz-firebase-adminsdk-7te66-ec5b44ad
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://bloombox-xyz.firebaseio.com',
+  databaseURL: 'https://bloombox-xyz-default-rtdb.firebaseio.com',
 });
 
 import * as functions from 'firebase-functions';
 require('dotenv').config();
-
-// Twillio setup
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
 
 // Logic for handling inbound messages
 import { handleInbound } from './handleInbound';
@@ -24,12 +19,7 @@ export const receiveJarvisMessage = functions.https.onRequest(
   async (request) => {
     console.log('request', request.body);
     const { Body, From } = request.body;
-    const response = await handleInbound(Body, From);
-    await client.messages.create({
-      body: response,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: From,
-    });
+    await handleInbound(Body, From);
   }
 );
 

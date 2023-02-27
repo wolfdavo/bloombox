@@ -43,12 +43,22 @@ exports.manageSubscription = functions.https.onRequest((req, res) => {
       subscription = event.data.object as Stripe.Checkout.Session;
       customer = subscription.customer as string;
       updateSubscriptionStatus(customer, 'active');
-      phNum = subscription.customer_details?.phone;
-      if (phNum) {
-        sendText(phNum, 'Thanks for subscribing to Claudio! 🎉');
-      }
       break;
     case 'invoice.paid':
+      subscription = event.data.object as Stripe.Invoice;
+      customer = subscription.customer as string;
+      updateSubscriptionStatus(customer, 'active');
+      if (subscription.billing_reason === 'subscription_create') {
+        phNum = subscription.customer_phone;
+        if (phNum) {
+          sendText(
+            phNum,
+            // eslint-disable-next-line quotes
+            "Thanks for subscribing to Claudio! 🎉 You now have unlimited access. I'm here to help!"
+          );
+        }
+      }
+      break;
     case 'customer.subscription.created':
       subscription = event.data.object as Stripe.Invoice;
       customer = subscription.customer as string;

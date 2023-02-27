@@ -5,8 +5,9 @@ import { auth } from 'firebase-admin';
 import { createNewUser } from './authentication/createNewUser';
 import { getClaudioUser } from './authentication/getClaudioUser';
 import { messages } from './constants/messages';
+import { consumeTrialMessage } from './stripe/consumeTrialMessage';
 import {
-  createCustomerPortalSession,
+  // createCustomerPortalSession,
   createCustomerSubscriptionSession,
 } from './stripe/paymentWebhook';
 import { generateResponse } from './util/generateResponse';
@@ -46,13 +47,20 @@ export const handleInbound = async (message: string, phoneNumber: string) => {
     return;
   }
 
+  console.log('USER: ', JSON.stringify(user));
+
   // Check if user is in trial
   if (user.billingState === 'trial') {
     // If they have messages remaining, generate response and send it
     if (user.trialMessagesRemaining > 0) {
+      console.log('User has messages remaining');
+
       const response = await generateResponse(phoneNumber, message);
       await sendText(phoneNumber, response);
+      // Decrement messages remaining in database
+      await consumeTrialMessage(user.phoneNumber);
     } else {
+      console.log('User has no messages remaining');
       // If they don't have messages remaining, send them a message saying they need to upgrade
       const checkoutSession = await createCustomerSubscriptionSession(user.uid);
       if (checkoutSession === null) {
@@ -66,12 +74,13 @@ export const handleInbound = async (message: string, phoneNumber: string) => {
 
   // If user has failed billing, let them know and send Stripe link to fix it
   if (user.billingState === 'inactive') {
-    const billingPortal = await createCustomerPortalSession(user.uid);
-    if (billingPortal === null) {
+    // const billingPortal = await createCustomerPortalSession(user.uid);
+    const checkoutSession = await createCustomerSubscriptionSession(user.uid);
+    if (checkoutSession === null) {
       await sendText(phoneNumber, messages.error);
       return;
     }
-    await sendText(phoneNumber, messages.billingInactive + billingPortal.url);
+    await sendText(phoneNumber, messages.billingInactive + checkoutSession.url);
     return;
   }
 };
