@@ -40,3 +40,5 @@ export const testEndpoint = functions.https.onRequest(
     response.send(res);
   }
 );
+
+exports.stripe = require('./stripe/paymentWebhook');

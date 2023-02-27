@@ -49,6 +49,7 @@ exports.manageSubscription = functions.https.onRequest((req, res) => {
       }
       break;
     case 'invoice.paid':
+    case 'customer.subscription.created':
       subscription = event.data.object as Stripe.Invoice;
       customer = subscription.customer as string;
       updateSubscriptionStatus(customer, 'active');
