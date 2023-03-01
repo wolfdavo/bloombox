@@ -26,16 +26,36 @@ export const sendText = async (to: string, message: string) => {
   const isSMS = to.startsWith('+'); // Phone number, FB Messenger ID's start with 'fbm-'
   if (isSMS) {
     // Use Twilio for SMS
-    await client.messages
-      .create({
-        body: message,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to,
-      })
-      .catch((error: unknown) => {
-        console.log('Error sending text:', error);
-        return Promise.reject(new Error('error-sending-text'));
-      });
+    const maxMMSLength = 1600;
+    if (message.length < maxMMSLength) {
+      await client.messages
+        .create({
+          body: message,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to,
+        })
+        .catch((error: unknown) => {
+          console.log('Error sending text:', error);
+          return Promise.reject(new Error('error-sending-text'));
+        });
+    } else {
+      for (let i = 0; i < message.length; i += maxMMSLength) {
+        const remainingCharacters = message.length - i;
+        await client.messages
+          .create({
+            body: message.substring(
+              i,
+              i + Math.min(maxMMSLength, remainingCharacters)
+            ),
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to,
+          })
+          .catch((error: unknown) => {
+            console.log('Error sending text:', error);
+            return Promise.reject(new Error('error-sending-text'));
+          });
+      }
+    }
   } else {
     // Use Vonage for Messenger
     await vonage.messages
