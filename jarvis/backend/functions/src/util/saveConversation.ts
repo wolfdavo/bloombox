@@ -1,7 +1,11 @@
 import * as admin from 'firebase-admin';
 import { ServerValue } from 'firebase-admin/database';
+import { ChatCompletionRequestMessage } from 'openai';
 
-export const saveConversation = async (phNum: string, conversation: string) => {
+export const saveConversation = async (
+  phNum: string,
+  conversation: ChatCompletionRequestMessage[]
+) => {
   const db = admin.database();
   await db
     .ref(`conversations/${phNum}`)

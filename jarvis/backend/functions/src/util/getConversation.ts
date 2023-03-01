@@ -1,8 +1,11 @@
 /* eslint-disable quotes */
 import * as admin from 'firebase-admin';
+import { ChatCompletionRequestMessage } from 'openai';
 import { memory, messages } from '../constants';
 
-export const getConversation = async (phNum: string) => {
+export const getConversation = async (
+  phNum: string
+): Promise<ChatCompletionRequestMessage[]> => {
   const db = admin.database();
   // First, check if the last active was within our short term memory
   const lastActive = await db
@@ -17,7 +20,7 @@ export const getConversation = async (phNum: string) => {
     const now = Date.now();
     const diff = now - lastActiveTime;
     if (diff > memory.shortTermMemory) {
-      return messages.promtInjection.base;
+      return [{ role: 'system', content: messages.promtInjection.base }];
     }
   }
 
@@ -30,8 +33,8 @@ export const getConversation = async (phNum: string) => {
       return Promise.reject(new Error('error-getting-conversation'));
     });
   if (doc.exists()) {
-    return doc.val() as string;
+    return doc.val() as ChatCompletionRequestMessage[];
   } else {
-    return messages.promtInjection.base;
+    return [{ role: 'system', content: messages.promtInjection.base }];
   }
 };
