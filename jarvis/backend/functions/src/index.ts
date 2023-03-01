@@ -12,14 +12,30 @@ import * as functions from 'firebase-functions';
 require('dotenv').config();
 
 // Logic for handling inbound messages
-import { handleInbound } from './handleInbound';
+import { handleInboundSMS, handleInboundMessenger } from './handleInbound';
 import { generateResponse } from './util/generateResponse';
 
 export const receiveJarvisMessage = functions.https.onRequest(
   async (request) => {
     console.log('request', request.body);
     const { Body, From } = request.body;
-    await handleInbound(Body, From);
+    await handleInboundSMS(Body, From);
+  }
+);
+
+export const receiveMessengerMessage = functions.https.onRequest(
+  async (request, response) => {
+    console.log('request', request.body);
+    const { text, from } = request.body;
+    await handleInboundMessenger(text, from);
+    response.status(200).send('OK');
+  }
+);
+
+export const receiveVonageStatus = functions.https.onRequest(
+  async (request, response) => {
+    console.log('request', request.body);
+    response.status(200).send('OK');
   }
 );
 

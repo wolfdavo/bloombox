@@ -15,6 +15,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@vonage/server-sdk": "^3.0.20",
     "dotenv": "^16.0.3",
     "eslint-config-prettier": "^8.6.0",
     "firebase-admin": "^11.5.0",
