@@ -1,3 +1,7 @@
+import { getUID } from '../authentication/getUID';
+import { getBillingSession } from '../stripe/getBillingSession';
+import { getCustomerId } from '../stripe/getCustomerId';
+
 /* eslint-disable @typescript-eslint/no-var-requires */
 require('dotenv').config();
 
@@ -25,6 +29,16 @@ const vonage = new Vonage(
 export const sendText = async (to: string, message: string) => {
   const isSMS = to.startsWith('+'); // Phone number, FB Messenger ID's start with 'fbm-'
   if (isSMS) {
+    // If there is a billing portal link in the message
+    if (message.includes('{billingPortal}')) {
+      // We need to generate a billing link and replace all
+      // occurrences of {billingPortal} in the message with the link
+      const uid = await getUID(to);
+      const stripeCustomerId = await getCustomerId(uid);
+      const billingSession = await getBillingSession(stripeCustomerId);
+      const billingLink = billingSession.url;
+      message = message.split('{billingPortal}').join(billingLink);
+    }
     // Use Twilio for SMS
     const maxMMSLength = 1600;
     if (message.length < maxMMSLength) {

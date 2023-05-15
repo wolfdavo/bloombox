@@ -35,6 +35,6 @@ export const getConversation = async (
   if (doc.exists()) {
     return doc.val() as ChatCompletionRequestMessage[];
   } else {
-    return [{ role: 'system', content: messages.promtInjection.base }];
+    return [{ role: 'system', content: messages.promtInjection.basePremium }];
   }
 };

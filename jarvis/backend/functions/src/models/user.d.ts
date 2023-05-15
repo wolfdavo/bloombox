@@ -5,4 +5,5 @@ interface ClaudioUser {
   trialMessagesRemaining: number;
   name?: string;
   stripeCustomerId?: string;
+  accountType: 'premium' | 'basic' | 'trial';
 }

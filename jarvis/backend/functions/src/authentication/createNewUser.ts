@@ -39,6 +39,7 @@ export const createNewUser = async (phoneNumber: string) => {
           billingState: 'trial',
           trialMessagesRemaining: 10,
           stripeCustomerId,
+          accountType: 'trial',
         };
         await ref.set(userRecord);
         return Promise.resolve(user);
